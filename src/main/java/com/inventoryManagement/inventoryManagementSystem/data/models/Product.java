@@ -19,6 +19,7 @@ public class Product {
     private String productName;
     private List<String> imageUrls;
     private LocalDateTime savedTime;
+    private LocalDateTime deletedTime;
     private double priceForEach;
     private  Long quantity;
     private TrackingInfo trackInfo;
