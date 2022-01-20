@@ -1,7 +1,12 @@
 package com.inventoryManagement.inventoryManagementSystem.service.TrackingInfoService;
 
+import com.inventoryManagement.inventoryManagementSystem.data.models.Product;
 import com.inventoryManagement.inventoryManagementSystem.data.models.TrackingInfo;
-import com.inventoryManagement.inventoryManagementSystem.data.repositories.TrackingInfoRepo;
+import com.inventoryManagement.inventoryManagementSystem.data.repositories.ProductRepository;
+import com.inventoryManagement.inventoryManagementSystem.data.repositories.TrackingInfoRepository;
+import com.inventoryManagement.inventoryManagementSystem.service.ProductService.ProductService;
+import com.inventoryManagement.inventoryManagementSystem.service.ProductService.ProductServiceImpl;
+import com.inventoryManagement.inventoryManagementSystem.service.dtos.ProductDto;
 import com.inventoryManagement.inventoryManagementSystem.service.exceptions.InventoryException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -10,22 +15,30 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 class TrackingInfoServiceImplTest {
     @Mock
-    private TrackingInfoRepo trackRepoImpl;
+    private TrackingInfoRepository trackingInfoRepoImpl;
+    @Mock
+    private ProductRepository productRepositoryImpl;
+
     @InjectMocks
-    private TrackingInfoService trackingInfoServiceImpl;
+    private TrackingInfoServiceImpl trackingInfoServiceImpl;
+
+    @Mock
+    private ProductService productServiceImpl;
 
     @BeforeEach
     void setUp(){
-        trackingInfoServiceImpl= new TrackingInfoServiceImpl();
+
         MockitoAnnotations.openMocks(this);
     }
 
@@ -36,7 +49,7 @@ class TrackingInfoServiceImplTest {
         trackingInfo.setProductName("pepsi");
         trackingInfo.setTotalQuantity(100L);
 
-        when(trackRepoImpl.findByProductName("pepsi")).thenReturn(trackingInfo);
+        when(trackingInfoRepoImpl.findByProductName("pepsi")).thenReturn(trackingInfo);
 
         TrackingInfo productInfo = trackingInfoServiceImpl.findProductInfoByName("Pepsi");
         assertThat(productInfo).isNotNull();
@@ -49,7 +62,7 @@ class TrackingInfoServiceImplTest {
         trackingInfo.setProductName("pepsi");
         trackingInfo.setTotalQuantity(100L);
 
-        when(trackRepoImpl.findByProductName("Pepsi")).thenReturn(null);
+        when(trackingInfoRepoImpl.findByProductName("Pepsi")).thenReturn(null);
 
         assertThrows(InventoryException.class,()-> trackingInfoServiceImpl.findProductInfoByName("Pepsi"));
 
@@ -63,7 +76,7 @@ class TrackingInfoServiceImplTest {
         trackingInfo.setProductName("pepsi");
         trackingInfo.setTotalQuantity(100L);
 
-        when(trackRepoImpl.save(trackingInfo)).thenReturn(trackingInfo);
+        when(trackingInfoRepoImpl.save(trackingInfo)).thenReturn(trackingInfo);
         TrackingInfo retrievedTrackingInfo = trackingInfoServiceImpl.save(trackingInfo);
         assertThat(retrievedTrackingInfo).isNotNull();
         assertThat(retrievedTrackingInfo.getTrackingId()).isNotNull();
@@ -75,7 +88,7 @@ class TrackingInfoServiceImplTest {
         List<TrackingInfo> trackingInfos =  new ArrayList<>();
         trackingInfos.add(new TrackingInfo());
 
-        when(trackRepoImpl.findAll()).thenReturn(trackingInfos);
+        when(trackingInfoRepoImpl.findAll()).thenReturn(trackingInfos);
         List<TrackingInfo>returnedInfos = trackingInfoServiceImpl.findAllTrackingInfo();
         assertThat(returnedInfos).isNotNull();
         assertThat(returnedInfos).isNotEmpty();
@@ -86,7 +99,24 @@ class TrackingInfoServiceImplTest {
     void findAllTrackingInfosInAnEmptyDatabase(){
         List<TrackingInfo> trackingInfos =  new ArrayList<>();
 
-        when(trackRepoImpl.findAll()).thenReturn(trackingInfos);
+        when(trackingInfoRepoImpl.findAll()).thenReturn(trackingInfos);
         assertThrows(InventoryException.class,()->trackingInfoServiceImpl.findAllTrackingInfo());
+    }
+
+    @Test
+    @DisplayName("Test that product can be deleted")
+    void deleteProduct() throws InventoryException {
+        TrackingInfo trackingInfo =  new TrackingInfo();
+        trackingInfo.setProductName("pepsi");
+        trackingInfo.setTotalQuantity(100L);
+        Product product = new Product();
+
+        ProductDto productDto = new ProductDto();
+        productDto.setProductName("pepsi");
+
+        when(trackingInfoRepoImpl.findByProductName("pepsi")).thenReturn(trackingInfo);
+        when(trackingInfoRepoImpl.save(any())).thenReturn(trackingInfo);
+        when(productServiceImpl.removeProduct(productDto)).thenReturn(product);
+        trackingInfoServiceImpl.deleteProduct("Pepsi");
     }
 }

@@ -4,7 +4,7 @@ import com.inventoryManagement.inventoryManagementSystem.data.enums.Operation;
 import com.inventoryManagement.inventoryManagementSystem.data.models.Product;
 import com.inventoryManagement.inventoryManagementSystem.data.models.TrackingInfo;
 import com.inventoryManagement.inventoryManagementSystem.data.repositories.ProductRepository;
-import com.inventoryManagement.inventoryManagementSystem.data.repositories.TrackingInfoRepo;
+import com.inventoryManagement.inventoryManagementSystem.data.repositories.TrackingInfoRepository;
 import com.inventoryManagement.inventoryManagementSystem.service.TrackingInfoService.TrackingInfoService;
 import com.inventoryManagement.inventoryManagementSystem.service.TrackingInfoService.TrackingInfoServiceImpl;
 import com.inventoryManagement.inventoryManagementSystem.service.dtos.ProductDto;
@@ -29,16 +29,14 @@ public class ProductServiceImplTest {
     @Mock
     private ProductRepository productRepositoryImpl;
     @Mock
-    private TrackingInfoRepo trackRepoImpl;
+    private TrackingInfoRepository trackRepoImpl;
     @InjectMocks
-    private ProductService productServiceImpl;
+    private ProductServiceImpl productServiceImpl;
     @InjectMocks
-    private TrackingInfoService trackInfoServiceImpl;
+    private TrackingInfoServiceImpl trackInfoServiceImpl;
 
     @BeforeEach
     void setUp(){
-        productServiceImpl = new ProductServiceImpl();
-        trackInfoServiceImpl = new TrackingInfoServiceImpl();
         MockitoAnnotations.openMocks(this);
     }
 
