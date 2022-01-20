@@ -12,7 +12,6 @@ import java.util.List;
 public class ProductDto {
     @NotNull @NotBlank @NotEmpty
     private String productName;
-    @NotNull @NotBlank @NotEmpty
     private List<String> imageUrls;
     private double priceForEach;
     private  int quantity;
