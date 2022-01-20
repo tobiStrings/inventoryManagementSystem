@@ -1,6 +1,7 @@
 package com.inventoryManagement.inventoryManagementSystem.data.repositories;
 
 import com.inventoryManagement.inventoryManagementSystem.data.models.Product;
+import com.inventoryManagement.inventoryManagementSystem.data.models.TrackingInfo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,6 +25,10 @@ class ProductRepositoryTest {
         productToSave.setQuantity(1L);
         productToSave.setSavedTime(LocalDateTime.now());
         productToSave.getImageUrls().add("gfdstrewtretwr464");
+        TrackingInfo productInfo = new TrackingInfo();
+        productInfo.setEntryTime(LocalDateTime.now());
+        productInfo.setTotalQuantity(1L);
+        productToSave.setTrackInfo(productInfo);
         Product savedProduct = productRepositoryImpl.save(productToSave);
         assertThat(savedProduct.getId()).isNotNull();
         assertThat(savedProduct.getSavedTime()).isNotNull();
