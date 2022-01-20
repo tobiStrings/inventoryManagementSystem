@@ -4,35 +4,38 @@ import com.inventoryManagement.inventoryManagementSystem.data.enums.Operation;
 import com.inventoryManagement.inventoryManagementSystem.data.models.Product;
 import com.inventoryManagement.inventoryManagementSystem.data.models.TrackingInfo;
 import com.inventoryManagement.inventoryManagementSystem.data.repositories.ProductRepository;
-import com.inventoryManagement.inventoryManagementSystem.data.repositories.TrackingInfoRepo;
+import com.inventoryManagement.inventoryManagementSystem.data.repositories.TrackingInfoRepository;
 import com.inventoryManagement.inventoryManagementSystem.service.dtos.ProductDto;
 import com.inventoryManagement.inventoryManagementSystem.service.exceptions.InventoryException;
 import com.inventoryManagement.inventoryManagementSystem.service.exceptions.SaveProductDtoException;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 
 @Service
-@Transactional
+@RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService{
     @Autowired
-    private ProductRepository productRepositoryImpl;
+    private final ProductRepository productRepositoryImpl;
     @Autowired
-    private TrackingInfoRepo trackInfoServiceImpl;
-//    private  TrackingInfoService trackInfoServiceImpl ;
+    private final TrackingInfoRepository trackingInfoRepositoryImpl;
+
     private final ModelMapper mapper = new ModelMapper();
+
+
 
     @Override
     public Product addProduct(ProductDto productToSave) throws SaveProductDtoException {
 //        trackInfoServiceImpl = new TrackingInfoServiceImpl();
         validateSaveProductDto(productToSave);
 
-        TrackingInfo trackInfo = trackInfoServiceImpl.findByProductName(productToSave.getProductName());
+        TrackingInfo trackInfo = trackingInfoRepositoryImpl.findByProductName(productToSave.getProductName());
 
         if (trackInfo == null){
             trackInfo = new TrackingInfo();
@@ -41,10 +44,11 @@ public class ProductServiceImpl implements ProductService{
         }
         trackInfo.setTotalQuantity(trackInfo.getTotalQuantity()+productToSave.getQuantity());
         trackInfo.setEntryTime(LocalDateTime.now());
-        trackInfoServiceImpl.save(trackInfo);
+        trackingInfoRepositoryImpl.save(trackInfo);
 
         Product product =  new Product();
         mapper.map(productToSave,product);
+        product.setSavedTime(LocalDateTime.now());
         return productRepositoryImpl.save(product);
     }
 
@@ -74,7 +78,7 @@ public class ProductServiceImpl implements ProductService{
 
     @Override
     public Product removeProduct(ProductDto productDto) throws InventoryException {
-        TrackingInfo trackInfo = trackInfoServiceImpl.findByProductName(productDto.getProductName());
+        TrackingInfo trackInfo = trackingInfoRepositoryImpl.findByProductName(productDto.getProductName());
         if (trackInfo == null){
             throw new InventoryException("Product does not exist");
         }
@@ -82,11 +86,13 @@ public class ProductServiceImpl implements ProductService{
             throw new InventoryException("The products available is less than the item demanded for. The remaining products is "+trackInfo.getTotalQuantity());
         }
         trackInfo.setTotalQuantity(trackInfo.getTotalQuantity() - productDto.getQuantity());
-        trackInfoServiceImpl.save(trackInfo);
+        trackInfo.setRemovedTime(LocalDateTime.now());
+        trackingInfoRepositoryImpl.save(trackInfo);
 
         Product product = new Product();
         mapper.map(productDto,product);
         product.setOperation(Operation.DELETE);
+        product.setDeletedTime(LocalDateTime.now());
 
         productRepositoryImpl.save(product);
 

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 
 
 @Repository
-public interface TrackingInfoRepo extends MongoRepository<TrackingInfo,String> {
+public interface TrackingInfoRepository extends MongoRepository<TrackingInfo,String> {
     TrackingInfo findByProductName(String productName);
     void deleteByProductName(String productName);
 
